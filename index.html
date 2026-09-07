@@ -2927,6 +2927,17 @@
       else alert(r&&r.error||'No se pudo cambiar la clave.');
     }
     async function callGasApi(action, params={}) { try { const r=await fetch(getGasUrl()+'?'+new URLSearchParams({action,...params}),{method:'GET'}); return await r.json(); } catch(e){ return {success:false,error:'No se pudo conectar con Google Sheets'}; } }
+    async function cargarCancionesDesdeSheets(){
+      const result=await callGasApi('obtenerCanciones');
+      if(result&&result.success&&Array.isArray(result.songs)&&result.songs.length){
+        myTracks=result.songs.map(song=>({id:song.id,title:song.title,genre:song.genre||'Sin género',desc:song.desc||'',ytId:song.ytId||null,icon:song.icon||'🎵',url:song.url||''}));
+        renderSongs();
+        return true;
+      }
+      myTracks=defaultTracks;
+      renderSongs();
+      return false;
+    }
 
     function startProjectRegistration() {
       const win = document.getElementById('chatbot-modal');
@@ -3492,14 +3503,10 @@
       { id: 'track_3', title: 'Trátame Suavemente (Cover Versión)', genre: 'Pop', desc: 'Producción vocal y arreglos musicales', ytId: 'V5O2Jwjq8bo', url: 'https://www.youtube.com/watch?v=V5O2Jwjq8bo', icon: '🎤' }
     ];
 
+    // El portafolio público usa Google Sheets como fuente principal.
+    // localStorage se conserva como respaldo local, no se borra.
     let myTracks = [];
     let activeGenre = 'Todos';
-    try {
-      const saved = localStorage.getItem('miki_tracks');
-      myTracks = saved ? JSON.parse(saved) : defaultTracks;
-    } catch(e) {
-      myTracks = defaultTracks;
-    }
 
     function generateTrackCode() {
       return `MA-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${new Date().getFullYear()}`;
@@ -3805,6 +3812,10 @@
         alert(error.message || 'No se pudo subir el audio a Google Drive.');
         return;
       }
+      const publicUrl = url || mixedSource || rawSource || '';
+      const saveResult = await callGasApi('registrarCancion',{token:getAdminToken(),id:'song_'+Date.now(),title,genre,desc:genre,ytId:'',icon:'🎵',url:publicUrl});
+      if(!saveResult || !saveResult.success){ alert(saveResult&&saveResult.error || 'No se pudo guardar la canción en Google Sheets.'); return; }
+      await cargarCancionesDesdeSheets();
       let ytId = null;
       if (url.includes('youtube.com/watch?v=')) ytId = url.split('v=')[1].split('&')[0];
       else if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1].split('?')[0];
@@ -3861,7 +3872,7 @@
       return link;
     }
 
-    function addCustomSongLink() {
+    async function addCustomSongLink() {
       const title = document.getElementById('song-title-input').value.trim();
       const genre = document.getElementById('song-genre-input').value.trim() || 'Producción Musical';
       const url = normalizeAudioLink(document.getElementById('song-url-input').value);
@@ -3881,20 +3892,9 @@
       }
 
       const newId = 'song_' + Date.now();
-      myTracks.unshift({
-        id: newId,
-        title: title,
-        desc: genre,
-        genre: genre,
-        url: url,
-        rawUrl: rawUrl,
-        mixedUrl: mixedUrl,
-        ytId: ytId,
-        icon: '🎵',
-        trackingCode: generateTrackCode()
-      });
-      saveTracks();
-      renderSongs();
+      const saveResult = await callGasApi('registrarCancion',{token:getAdminToken(),id:newId,title,genre,desc:genre,ytId:ytId||'',icon:'🎵',url:url||mixedUrl||rawUrl});
+      if(!saveResult || !saveResult.success){ alert(saveResult&&saveResult.error || 'No se pudo guardar la canción en Google Sheets.'); return; }
+      await cargarCancionesDesdeSheets();
 
       document.getElementById('song-title-input').value = '';
       document.getElementById('song-genre-input').value = '';
@@ -3907,6 +3907,7 @@
 
     renderSongs();
     renderProjectList();
+    cargarCancionesDesdeSheets();
 
     // Testimonios: publica una vista previa en la página y abre Gmail para enviarlo.
     function renderSavedTestimonials() {
