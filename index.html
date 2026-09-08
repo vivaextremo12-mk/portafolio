@@ -1789,7 +1789,11 @@
     .quick-menu-toggle span, .quick-menu-toggle span::before, .quick-menu-toggle span::after { display:block; width:20px; height:2px; border-radius:3px; background:currentColor; content:''; transition:all .22s ease; }
     .quick-menu-toggle span::before { transform:translateY(-6px); }
     .quick-menu-toggle span::after { transform:translateY(4px); }
-    .quick-menu { position:fixed; top:74px; left:18px; z-index:1199; display:none; width:245px; padding:12px; border:1px solid rgba(56,189,248,.3); border-radius:18px; background:rgba(10,16,27,.97); box-shadow:0 18px 45px rgba(0,0,0,.55); }
+    .quick-menu { position:fixed; top:74px; left:18px; z-index:1199; display:none; width:245px; max-height:calc(100vh - 100px); overflow-y:auto; padding:12px; border:1px solid rgba(56,189,248,.3); border-radius:18px; background:rgba(10,16,27,.97); box-shadow:0 18px 45px rgba(0,0,0,.55); scrollbar-width:thin; scrollbar-color:rgba(56,189,248,.8) rgba(255,255,255,.08); }
+    .quick-menu::-webkit-scrollbar { width:8px; }
+    .quick-menu::-webkit-scrollbar-track { background:rgba(255,255,255,.08); border-radius:999px; margin:6px 0; }
+    .quick-menu::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#38bdf8,#6366f1); border-radius:999px; }
+    .quick-menu::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,#67e8f9,#a855f7); }
     .quick-menu.open { display:grid; gap:5px; animation:popIn .2s ease-out; }
     .quick-menu a { display:flex; align-items:center; gap:9px; padding:10px 12px; border-radius:10px; color:#cbd5e1; text-decoration:none; font-size:.8rem; font-weight:700; transition:all .18s ease; }
     .quick-menu a:hover { background:linear-gradient(135deg,rgba(56,189,248,.18),rgba(168,85,247,.16)); color:#fff; transform:translateX(3px); }
@@ -1816,7 +1820,7 @@
     .dots-dropdown input.admin-input { margin:5px 0; width:100%; }
     .dropdown-btn-delete { border-radius:10px; margin-top:5px; transition:all .2s ease; }
     .dropdown-btn-delete:hover { transform:translateY(-2px); }
-    @media (max-width:600px) { .quick-menu-toggle { top:12px; left:12px; } .quick-menu { top:66px; left:12px; width:calc(100vw - 24px); } .admin-editor-grid { grid-template-columns:1fr; } .admin-editor-field.full { grid-column:auto; } }
+    @media (max-width:600px) { .quick-menu-toggle { top:12px; left:12px; } .quick-menu { top:66px; left:12px; width:calc(100vw - 24px); max-height:calc(100vh - 90px); } .admin-editor-grid { grid-template-columns:1fr; } .admin-editor-field.full { grid-column:auto; } }
 
 
 
@@ -1881,6 +1885,122 @@
     .status-detail span { display:block; color:#fff; font-size:.76rem; margin-top:3px; }
     @media(max-width:600px){.status-details-grid{grid-template-columns:1fr}.project-admin-item{align-items:flex-start;flex-direction:column}.project-admin-item button{width:100%}}
 
+
+
+    /* ===================================================
+       SISTEMA DE TUTORIAL INTERACTIVO / GUÍA DE USUARIO
+       =================================================== */
+    #tutorial-welcome, #tutorial-final {
+      position: fixed; inset: 0; z-index: 4000; display: none;
+      align-items: center; justify-content: center;
+      background: rgba(5, 8, 14, 0.82); backdrop-filter: blur(6px);
+      padding: 20px;
+    }
+    #tutorial-welcome.show, #tutorial-final.show { display: flex; animation: tutFadeIn .25s ease-out; }
+    .tutorial-welcome-card {
+      position: relative; max-width: 420px; width: 100%; text-align: center;
+      background: linear-gradient(150deg, #101c2e, #171331);
+      border: 1px solid rgba(56,189,248,.35); border-radius: 22px;
+      padding: 38px 30px 30px; box-shadow: 0 25px 60px rgba(0,0,0,.6);
+      animation: tutPopIn .28s ease-out;
+    }
+    .tutorial-welcome-card .tut-close-x {
+      position: absolute; top: 14px; right: 14px; width: 32px; height: 32px;
+      border-radius: 50%; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06);
+      color: #cbd5e1; font-size: 1.05rem; cursor: pointer; display: grid; place-items: center;
+      transition: all .15s ease;
+    }
+    .tutorial-welcome-card .tut-close-x:hover { background: rgba(239,68,68,.85); color: #fff; border-color: transparent; }
+    .tutorial-welcome-card .tut-icon { font-size: 2.6rem; margin-bottom: 12px; }
+    .tutorial-welcome-card h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; color: #fff; margin-bottom: 10px; }
+    .tutorial-welcome-card p { color: var(--text-muted); font-size: .9rem; margin-bottom: 24px; line-height: 1.55; }
+    .tut-start-btn {
+      display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer;
+      background: linear-gradient(135deg,#38bdf8,#6366f1,#a855f7); color: #06111d;
+      font-weight: 800; font-size: .92rem; padding: 13px 26px; border-radius: 50px;
+      box-shadow: 0 10px 26px rgba(56,189,248,.35); transition: transform .18s ease;
+    }
+    .tut-start-btn:hover { transform: translateY(-2px) scale(1.02); }
+    .tut-skip-link {
+      display: block; margin-top: 16px; color: var(--text-muted); font-size: .78rem;
+      background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+    }
+    .tut-skip-link:hover { color: #fff; }
+
+    #tutorial-overlay {
+      position: fixed; inset: 0; z-index: 3900; display: none; pointer-events: none;
+    }
+    #tutorial-overlay.active { display: block; }
+    #tutorial-backdrop {
+      position: fixed; inset: 0; background: rgba(5,7,12,.72);
+      transition: clip-path .35s ease, border-radius .35s ease;
+      pointer-events: auto;
+    }
+    #tutorial-spot {
+      position: fixed; z-index: 3910; pointer-events: none;
+      border-radius: 16px; border: 2px solid rgba(56,189,248,.9);
+      box-shadow: 0 0 0 6px rgba(56,189,248,.18), 0 0 35px 6px rgba(56,189,248,.5), 0 0 0 9999px rgba(5,7,12,.72);
+      transition: top .38s cubic-bezier(.4,0,.2,1), left .38s cubic-bezier(.4,0,.2,1), width .38s cubic-bezier(.4,0,.2,1), height .38s cubic-bezier(.4,0,.2,1);
+    }
+    #tutorial-hand {
+      position: fixed; z-index: 3950; font-size: 2.1rem; pointer-events: none;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,.6));
+      transition: top .45s cubic-bezier(.4,0,.2,1), left .45s cubic-bezier(.4,0,.2,1);
+      animation: tutHandTap 1.1s ease-in-out infinite;
+      transform: translate(-18%, -10%);
+    }
+    #tutorial-card {
+      position: fixed; z-index: 3960; width: min(320px, 86vw);
+      background: linear-gradient(150deg, #101c2e, #171331);
+      border: 1px solid rgba(56,189,248,.4); border-radius: 18px;
+      padding: 18px 20px; box-shadow: 0 20px 45px rgba(0,0,0,.55);
+      transition: top .38s cubic-bezier(.4,0,.2,1), left .38s cubic-bezier(.4,0,.2,1);
+      pointer-events: auto; /* el overlay padre tiene pointer-events:none; sin esto los botones no reciben clics */
+    }
+    .tut-card-step { color: #7dd3fc; font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+    .tut-card-title { color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; margin-bottom: 6px; }
+    .tut-card-desc { color: #cbd5e1; font-size: .82rem; line-height: 1.5; margin-bottom: 14px; }
+    .tut-card-progress { display: flex; gap: 5px; margin-bottom: 14px; }
+    .tut-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.18); transition: all .2s ease; }
+    .tut-dot.active { background: var(--accent); width: 18px; border-radius: 4px; }
+    .tut-card-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .tut-nav-left { display: flex; gap: 8px; }
+    .tut-btn {
+      border: 1px solid rgba(56,189,248,.35); border-radius: 10px; cursor: pointer;
+      background: rgba(56,189,248,.1); color: #e0f2fe; font-weight: 800; font-size: .76rem;
+      padding: 8px 13px; transition: all .18s ease;
+    }
+    .tut-btn:hover { background: linear-gradient(135deg,#38bdf8,#6366f1); color: #06111d; }
+    .tut-btn.tut-btn-primary { background: linear-gradient(135deg,#38bdf8,#6366f1,#a855f7); color: #06111d; border-color: transparent; }
+    .tut-btn.tut-btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted); font-size: .72rem; text-decoration: underline; }
+    .tut-btn.tut-btn-ghost:hover { color: #fff; background: transparent; }
+    .tut-btn[disabled] { opacity: .35; cursor: not-allowed; pointer-events: none; }
+    .tut-card-x {
+      position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); color: #cbd5e1;
+      font-size: .85rem; cursor: pointer; display: grid; place-items: center; transition: all .15s ease;
+    }
+    .tut-card-x:hover { background: rgba(239,68,68,.85); color: #fff; border-color: transparent; }
+
+    .tutorial-final-card { position: relative; max-width: 380px; width: 100%; text-align: center;
+      background: linear-gradient(150deg, #101c2e, #171331); border: 1px solid rgba(168,85,247,.4);
+      border-radius: 22px; padding: 36px 28px; box-shadow: 0 25px 60px rgba(0,0,0,.6);
+      animation: tutPopIn .28s ease-out;
+    }
+    .tutorial-final-card .tut-icon { font-size: 2.6rem; margin-bottom: 10px; }
+    .tutorial-final-card h2 { font-family: 'Space Grotesk', sans-serif; color: #fff; font-size: 1.35rem; margin-bottom: 10px; }
+    .tutorial-final-card p { color: var(--text-muted); font-size: .88rem; margin-bottom: 22px; line-height: 1.5; }
+
+    @keyframes tutFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes tutPopIn { from { opacity: 0; transform: scale(.92) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes tutHandTap { 0%,100% { transform: translate(-18%, -10%) scale(1); } 50% { transform: translate(-18%, -6%) scale(.94); } }
+
+    @media (max-width: 600px) {
+      #tutorial-card { width: min(280px, 90vw); padding: 15px 16px; }
+      #tutorial-hand { font-size: 1.7rem; }
+      .tutorial-welcome-card, .tutorial-final-card { padding: 28px 20px 24px; }
+    }
+
   </style>
 </head>
 <body oncontextmenu="return false;">
@@ -1897,9 +2017,51 @@
     <a href="#consultas-reclamos">✉️ Consultas y reclamos</a>
     <a href="#condiciones">📄 Condiciones y privacidad</a>
     <a href="#contacto">📞 Contacto</a>
+    <a href="#" id="quick-menu-tutorial-link">🎓 Tutorial</a>
   </div>
   <div class="glow-sphere glow-1"></div>
   <div class="glow-sphere glow-2"></div>
+
+  <!-- ===== SISTEMA DE TUTORIAL INTERACTIVO ===== -->
+  <div id="tutorial-welcome">
+    <div class="tutorial-welcome-card">
+      <button class="tut-close-x" id="tutorial-welcome-close" aria-label="Cerrar">✕</button>
+      <div class="tut-icon">👋</div>
+      <h2>¿No sabes por dónde empezar?</h2>
+      <p>Te mostramos rápidamente cómo funciona esta página: dónde escuchar canciones, ver precios, reservar tu sesión y hablar con Jarvis, el asistente virtual del estudio.</p>
+      <button class="tut-start-btn" id="tutorial-start-btn">▶ EMPEZAR</button>
+      <button class="tut-skip-link" id="tutorial-skip-btn">Omitir tutorial</button>
+    </div>
+  </div>
+
+  <div id="tutorial-overlay">
+    <div id="tutorial-backdrop"></div>
+    <div id="tutorial-spot"></div>
+    <div id="tutorial-hand">👆</div>
+    <div id="tutorial-card">
+      <button class="tut-card-x" id="tutorial-card-close" aria-label="Cerrar tutorial">✕</button>
+      <div class="tut-card-step" id="tutorial-card-step">Paso 1 / 9</div>
+      <div class="tut-card-title" id="tutorial-card-title">Título</div>
+      <div class="tut-card-desc" id="tutorial-card-desc">Descripción</div>
+      <div class="tut-card-progress" id="tutorial-card-dots"></div>
+      <div class="tut-card-nav">
+        <div class="tut-nav-left">
+          <button class="tut-btn" id="tutorial-back-btn">← Atrás</button>
+          <button class="tut-btn tut-btn-primary" id="tutorial-next-btn">Siguiente →</button>
+        </div>
+        <button class="tut-btn tut-btn-ghost" id="tutorial-skip-inline-btn">Omitir tutorial</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tutorial-final">
+    <div class="tutorial-final-card">
+      <div class="tut-icon">🎉</div>
+      <h2>¡Listo!</h2>
+      <p>Ahora ya conoces las funciones principales de la página. Puedes volver a ver este tutorial cuando quieras desde el menú ☰ → Tutorial.</p>
+      <button class="tut-start-btn" id="tutorial-finish-btn">COMENZAR</button>
+    </div>
+  </div>
 
   <!-- BARRA DE ADMINISTRADOR -->
   <div class="admin-bar" id="admin-top-bar">
@@ -2250,8 +2412,8 @@
       <input type="hidden" name="rating" id="testimonial-rating" value="5">
       <div class="rating-help">Selecciona de 1 a 5 estrellas, como en una reseña.</div>
       <textarea name="message" required placeholder="Cuéntame cómo fue tu experiencia trabajando conmigo..."></textarea>
-      <button class="testimonial-submit" type="submit">✦ Publicar testimonio y enviarlo por Gmail</button>
-      <div class="testimonial-status" id="testimonial-status">Tu testimonio fue registrado y se abrió Gmail para enviarlo a revisión.</div>
+      <button class="testimonial-submit" type="submit">✦ Publicar testimonio</button>
+      <div class="testimonial-status" id="testimonial-status">Tu testimonio fue publicado correctamente en el historial.</div>
     </form>
   </section>
 
@@ -2707,7 +2869,7 @@
       sendUserMessage();
     }
 
-    const quoteServices = [
+    let quoteServices = [
       { name: 'Grabación y Mezcla Básica', price: 130 },
       { name: 'Mezcla Completa', price: 150 },
       { name: 'Grabación + Mezcla + Afinación', price: 200 },
@@ -2807,7 +2969,7 @@
 
     function showCompareTool() {
       const message=addSmartMessage(`<div class="jarvis-result-card"><h4>⚖️ Comparador de paquetes</h4><p>Elige dos opciones para ver sus diferencias.</p><form class="chat-form" id="compare-form"><label>Primera opción</label><select name="a"><option value="basic">Básico</option><option value="mix">Mezcla Completa</option><option value="integral">Integral</option><option value="production">Producción Musical</option></select><label>Segunda opción</label><select name="b"><option value="integral">Integral</option><option value="basic">Básico</option><option value="mix">Mezcla Completa</option><option value="production">Producción Musical</option></select><button type="submit">Comparar ahora</button></form></div>`);
-      message.querySelector('form').addEventListener('submit',(event)=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));const rows={basic:['Grabación y Mezcla Básica','S/ 130','Grabación sobre pista propia, afinación básica y 1 revisión.','Si buscas una solución accesible para una canción.'],mix:['Mezcla Completa','S/ 150','Todo lo básico más mezcla de hasta 15 pistas, balance y 2 revisiones.','Si ya tienes las pistas grabadas.'],integral:['Grabación + Mezcla + Afinación','S/ 200','Todo lo anterior más grabación, afinación detallada y hasta 3 revisiones.','Si quieres un proceso vocal completo.'],production:['Producción Musical','Desde S/ 250','Todo lo integral más composición, beatmaking, arreglos y diseño sonoro.','Si partes de una idea y necesitas construir la canción.']};const a=rows[d.a],b=rows[d.b];addSmartMessage(`<div class="jarvis-result-card"><h4>${a[0]} vs. ${b[0]}</h4><table class="smart-table"><tr><th></th><th>${a[0]}</th><th>${b[0]}</th></tr><tr><th>Precio</th><td>${a[1]}</td><td>${b[1]}</td></tr><tr><th>Incluye</th><td>${a[2]}</td><td>${b[2]}</td></tr><tr><th>Conviene si</th><td>${a[3]}</td><td>${b[3]}</td></tr></table></div>`);event.currentTarget.remove();});
+      message.querySelector('form').addEventListener('submit',(event)=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));const rows={basic:[quoteServices[0]?.name||'Grabación y Mezcla Básica',`S/ ${quoteServices[0]?.price||130}`,'Grabación sobre pista propia, afinación básica y revisión.','Si buscas una solución accesible.'],mix:[quoteServices[1]?.name||'Mezcla Completa',`S/ ${quoteServices[1]?.price||150}`,'Mezcla profesional de tus pistas y revisiones.','Si ya tienes las pistas grabadas.'],integral:[quoteServices[2]?.name||'Grabación + Mezcla + Afinación',`S/ ${quoteServices[2]?.price||200}`,'Grabación, afinación y mezcla integral.','Si quieres trabajar toda la voz.'],production:[quoteServices[3]?.name||'Producción Musical',`S/ ${quoteServices[3]?.price||250}`,'Desarrollo completo de canción y arreglos.','Si partes de una idea musical.']};const a=rows[d.a],b=rows[d.b];addSmartMessage(`<div class="jarvis-result-card"><h4>${a[0]} vs. ${b[0]}</h4><table class="smart-table"><tr><th></th><th>${a[0]}</th><th>${b[0]}</th></tr><tr><th>Precio</th><td>${a[1]}</td><td>${b[1]}</td></tr><tr><th>Incluye</th><td>${a[2]}</td><td>${b[2]}</td></tr><tr><th>Conviene si</th><td>${a[3]}</td><td>${b[3]}</td></tr></table></div>`);event.currentTarget.remove();});
     }
 
     function showPreparationTool() {
@@ -3457,15 +3619,11 @@
     // MOTOR DE RESPUESTAS DE JARVIS (BASADO EN INFOGRAFÍA Y DATOS REALES)
     function generateJarvisResponse(q) {
       if (q.includes('precio') || q.includes('cuanto') || q.includes('costo') || q.includes('paquete') || q.includes('tarifa')) {
-        return "Miguel Ángel maneja 4 paquetes oficiales de estudio:<br><br>" +
-               "1. <b>Grabación y Mezcla Básica:</b> S/ 130 (hasta 2h grabación, afinación básica, 1 revisión).<br>" +
-               "2. <b>Mezcla Completa:</b> S/ 150 (hasta 15 pistas, balance, efectos, lista para master).<br>" +
-               "3. <b>Grabación + Mezcla + Afinación Completa:</b> S/ 200 (el más recomendado, trabajo vocal detallado y hasta 3 revisiones).<br>" +
-               "4. <b>Producción Musical Completa:</b> Desde S/ 250 (desarrollo de canción y beat a medida).<br><br>" +
-               "¿Te interesa agendar alguno?";
+        const rows=quoteServices.map((item,i)=>`${i+1}. <b>${escapeChatHTML(item.name)}:</b> S/ ${Number(item.price)||0}`).join('<br>');
+        return `Miguel Ángel maneja estos paquetes actuales:<br><br>${rows}<br><br>¿Te interesa agendar alguno?`;
       }
       else if (q.includes('mezcla') || q.includes('mix') || q.includes('master')) {
-        return "El paquete de <b>Mezcla Completa cuesta S/ 150</b> por canción. Incluye hasta 15 stems/pistas, ecualización, balance dinámico, compresión analógica y efectos espaciales, con 2 revisiones. Se entrega con niveles adecuados (-14 LUFS) listo para masterizar.";
+        return `El paquete de <b>${escapeChatHTML(quoteServices[1]?.name||'Mezcla Completa')} cuesta S/ ${Number(quoteServices[1]?.price||150)}</b> por canción. Incluye hasta 15 stems/pistas, ecualización, balance dinámico, compresión analógica y efectos espaciales, con 2 revisiones. Se entrega con niveles adecuados (-14 LUFS) listo para masterizar.`;
       }
       else if (q.includes('pago') || q.includes('adelanto') || q.includes('cobro') || q.includes('condicion') || q.includes('transferencia') || q.includes('cuenta') || q.includes('yape')) {
         return "Las condiciones de pago son claras:<br>" +
@@ -3910,6 +4068,16 @@
     cargarCancionesDesdeSheets();
 
     // Testimonios: publica una vista previa en la página y abre Gmail para enviarlo.
+    async function cargarTestimoniosDesdeSheets(){
+      const r=await callGasApi('obtenerTestimonios');
+      if(!r||!r.success)return;
+      const list=document.getElementById('testimonials-list');
+      if(!list)return;
+      list.innerHTML='';
+      (r.testimonials||[]).forEach(item=>{const card=document.createElement('article');card.className='testimonial-card';card.innerHTML=`<div class="testimonial-rating">${'★'.repeat(item.rating||5)}${'☆'.repeat(5-(item.rating||5))}</div><p class="testimonial-text">“${escapeChatHTML(item.message)}”</p><div class="testimonial-author">${escapeChatHTML(item.name)}</div><div class="testimonial-service">${escapeChatHTML(item.service)}</div>`;list.appendChild(card);});
+      if(!r.testimonials||!r.testimonials.length)list.innerHTML='<p id="testimonials-empty" style="grid-column:1/-1;color:var(--text-muted);font-size:.85rem;text-align:center;padding:20px;">Aún no hay testimonios publicados.</p>';
+    }
+
     function renderSavedTestimonials() {
       const list = document.getElementById('testimonials-list');
       if (!list) return;
@@ -3928,16 +4096,20 @@
       });
     }
 
-    document.getElementById('testimonial-form')?.addEventListener('submit', function(event) {
+    document.getElementById('testimonial-form')?.addEventListener('submit', async function(event) {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
       const name = String(data.get('name') || '').trim();
       const service = String(data.get('service') || '').trim();
       const message = String(data.get('message') || '').trim();
       const rating = Math.max(1, Math.min(5, Number(data.get('rating')) || 5));
-      const savedTestimonials = JSON.parse(localStorage.getItem('miki_testimonials') || '[]');
-      savedTestimonials.push({ name, service, message, rating });
-      localStorage.setItem('miki_testimonials', JSON.stringify(savedTestimonials));
+      const remote=await callGasApi('registrarTestimonio',{name,service,message,rating});
+      if(!remote||!remote.success){alert(remote&&remote.error||'No se pudo registrar el testimonio.');return;}
+      await cargarTestimoniosDesdeSheets();
+      document.getElementById('testimonial-status').style.display = 'block';
+      document.getElementById('testimonial-status').textContent = 'Tu testimonio fue publicado correctamente en el historial.';
+      event.currentTarget.reset();
+      return;
       const card = document.createElement('article');
       card.className = 'testimonial-card';
       const stars = document.createElement('div'); stars.className = 'testimonial-rating'; stars.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
@@ -4036,6 +4208,22 @@
       alert('Presentación guardada correctamente.');
     });
 
+    let remoteTariffs = [];
+    function applyRemoteTariffs(items){
+      if(!Array.isArray(items)||!items.length)return;
+      remoteTariffs=items;
+      quoteServices=items.slice(0,4).map(x=>({name:x.service,price:Number(x.price)||0}));
+      items.forEach((item,index)=>{
+        const card=document.querySelector(`[data-price-card="${index}"]`);
+        if(!card)return;
+        const price=card.querySelector('.pricing-price');
+        if(price)price.innerHTML=index===3?`<span style="font-size:1.5rem;font-weight:600;">Desde</span> S/ ${item.price}`:`S/ ${item.price}`;
+        const list=card.querySelector('.pricing-features');
+        if(list)list.innerHTML=(item.features||[]).map(feature=>`<li>${escapeChatHTML(feature)}</li>`).join('');
+      });
+    }
+    async function cargarTarifasDesdeSheets(){const r=await callGasApi('obtenerTarifas');if(r&&r.success){applyRemoteTariffs(r.tarifas);loadPricingEditor();}}
+
     const pricingDefaults = [
       { price: '130', features: ['Hasta 2 horas de grabación en estudio', 'Grabación sobre pista del cliente', 'Ajustes básicos de afinación vocal', '1 ronda de revisión incluida'] },
       { price: '150', features: ['Todo lo incluido en el paquete Básico, más: mezcla profesional de hasta 15 pistas (stems)', 'Balance dinámico, limpieza y efectos espaciales', '2 rondas de revisiones incluidas', 'Entrega con niveles óptimos lista para mastering'] },
@@ -4044,7 +4232,7 @@
     ];
 
     function loadPricingEditor() {
-      const data = JSON.parse(localStorage.getItem('miki_pricing_data') || 'null') || pricingDefaults;
+      const data = remoteTariffs.length ? remoteTariffs.map(x=>({price:String(x.price),features:x.features||[]})) : (JSON.parse(localStorage.getItem('miki_pricing_data') || 'null') || pricingDefaults);
       data.forEach((item, index) => {
         const card = document.querySelector(`[data-price-card="${index}"]`);
         if (!card) return;
@@ -4057,20 +4245,23 @@
       });
     }
 
-    document.getElementById('save-pricing-btn')?.addEventListener('click', () => {
+    document.getElementById('save-pricing-btn')?.addEventListener('click', async () => {
       const data = pricingDefaults.map((fallback, index) => ({
+        id: ['basic','mix','integral','production'][index],
+        service: ['Grabación y Mezcla Básica','Mezcla Completa','Grabación + Mezcla + Afinación','Producción Musical'][index],
         price: document.getElementById(`edit-price-${index}`).value.trim() || fallback.price,
-        features: document.getElementById(`edit-features-${index}`).value.split('\n').map((item) => item.trim()).filter(Boolean)
+        description: '',
+        features: document.getElementById(`edit-features-${index}`).value.split('\n').map((item) => item.trim()).filter(Boolean),
+        active: true
       }));
-      localStorage.setItem('miki_pricing_data', JSON.stringify(data));
-      loadPricingEditor();
-      alert('Tarifario actualizado correctamente.');
+      const r=await callGasApi('guardarTarifas',{token:getAdminToken(),tarifas:JSON.stringify(data)});
+      if(r&&r.success){applyRemoteTariffs(data);loadPricingEditor();alert('Tarifario actualizado en Google Sheets.');}else alert(r&&r.error||'No se pudo guardar el tarifario.');
     });
 
     loadAboutEditor();
     loadPricingEditor();
-
-    renderSavedTestimonials();
+    cargarTarifasDesdeSheets();
+    cargarTestimoniosDesdeSheets();
 
     // Calendario: genera la misma solicitud por WhatsApp o por Gmail según el botón elegido.
     const bookingDate = document.getElementById('booking-date');
@@ -4166,6 +4357,254 @@
     const oldSaveStatus=document.getElementById('save-status-btn');
     oldSaveStatus?.addEventListener('click',async()=>{const code=document.getElementById('edit-status-code').value.trim().toUpperCase();if(!code)return;const r=await callGasApi('actualizarAvance',{code,date:document.getElementById('edit-status-date').value||localDateString(),progress:document.getElementById('edit-status-progress').value,step:document.getElementById('edit-status-step').value,done:document.getElementById('edit-status-done').value,current:document.getElementById('edit-status-current').value,nextStep:document.getElementById('edit-status-note').value,note:document.getElementById('edit-status-note').value,token:getAdminToken()});if(r&&r.success){const h=await callGasApi('obtenerHistorialAvances',{code,token:getAdminToken()});window.activeRemoteHistory=(h&&h.success?h.history||[]:[]).map(x=>({...x,date:normalizeRemoteDate(x.date)}));loadAdvanceForSelectedDate();renderAdvanceHistory({history:window.activeRemoteHistory});alert('Avance guardado en Google Sheets.');cargarDatosDesdeGoogleSheets();}else alert(r&&r.error||'No se pudo guardar en Google Sheets.');});
     document.getElementById('status-lookup-btn')?.addEventListener('click',async()=>{const code=document.getElementById('status-code-input').value.trim().toUpperCase();if(!code)return;const r=await callGasApi('consultarTrabajoCliente',{code});if(r&&r.success&&r.project){const x=r.project;const box=document.getElementById('status-result');box.style.display='block';box.innerHTML=`<h3>${escapeChatHTML(x.song||x.project||'Proyecto')}</h3><p>Cliente: ${escapeChatHTML(x.client||'')} · Código: ${escapeChatHTML(x.code||code)}</p><div class="progress-caption"><span>Avance total</span><strong>${Number(x.progress)||0}%</strong></div><div class="public-progress"><div class="public-progress-bar" style="width:${Number(x.progress)||0}%"></div></div><div class="status-details-grid"><div class="status-detail"><b>Etapa</b><span>${escapeChatHTML(x.step||'Solicitud recibida')}</span></div><div class="status-detail"><b>Qué ya se hizo</b><span>${escapeChatHTML(x.done||x.lastAdvance||'—')}</span></div><div class="status-detail"><b>Qué se está haciendo</b><span>${escapeChatHTML(x.current||'—')}</span></div><div class="status-detail"><b>Próximo paso</b><span>${escapeChatHTML(x.nextStep||x.note||'—')}</span></div></div>`;}else alert(r&&r.error||'Código no encontrado');});
+  </script>
+
+  <!-- ===================================================
+       MOTOR DEL TUTORIAL INTERACTIVO / GUÍA DE USUARIO
+       Capa independiente: no modifica el resto de la app.
+       =================================================== -->
+  <script>
+  (function () {
+    // Cada paso apunta a un elemento REAL del HTML (por selector CSS).
+    // Puedes editar, quitar o agregar pasos aquí sin tocar el resto del código.
+    var tutorialSteps = [
+      {
+        selector: '#quick-menu-toggle',
+        title: 'Menú de navegación',
+        desc: 'Este botón (☰) abre el menú rápido. Desde ahí puedes ir a cualquier parte de la página: portafolio, tarifario, reservas, pagos, seguimiento y más.',
+        onEnter: function () { closeQuickMenu(); },
+        position: 'bottom-right'
+      },
+      {
+        selector: '#quick-menu',
+        title: 'Todos los accesos, en un solo lugar',
+        desc: 'Aquí están todas las secciones de la página. Puedes volver a abrir este tutorial en cualquier momento tocando "🎓 Tutorial" al final de esta lista.',
+        onEnter: function () { openQuickMenu(); },
+        onExit: function () { closeQuickMenu(); },
+        position: 'right'
+      },
+      {
+        selector: '#canciones .player-container',
+        title: 'Portafolio de canciones',
+        desc: 'Escucha canciones y demos directamente en la página, o ábrelas en YouTube. Elige un tema de la lista para reproducirlo aquí mismo.',
+        position: 'top'
+      },
+      {
+        selector: '#servicios .pricing-grid',
+        title: 'Tarifario oficial',
+        desc: 'Estos son los paquetes disponibles: grabación básica, mezcla completa, integral (grabación + mezcla + afinación) y producción musical desde una idea.',
+        position: 'top'
+      },
+      {
+        selector: '#reservas .booking-form',
+        title: 'Agenda tu sesión',
+        desc: 'Completa este formulario con tus datos y la fecha que prefieras. Puedes enviar la solicitud por WhatsApp o por Gmail con un solo botón.',
+        position: 'top'
+      },
+      {
+        selector: '.chatbot-bubble',
+        title: 'Jarvis, el asistente virtual',
+        desc: 'Este es Jarvis 🤖, el asistente virtual del estudio de Miguel Ángel. Puedes preguntarle por precios, servicios o cómo contactar, y él responde al instante.',
+        position: 'left'
+      },
+      {
+        selector: '#herramientas .smart-tools-grid',
+        title: 'Herramientas de Jarvis',
+        desc: 'Jarvis también te ayuda a decidir: hace un diagnóstico de tu proyecto, compara paquetes, te dice qué llevar a tu sesión y define tu identidad sonora.',
+        position: 'top'
+      },
+      {
+        selector: '#seguimiento .status-card',
+        title: 'Seguimiento de tu proyecto',
+        desc: 'Con el código que te entrega Miguel Ángel puedes consultar el avance de tu canción en cualquier momento. Si aún no tienes código, Jarvis puede registrar tu solicitud.',
+        position: 'top'
+      },
+      {
+        selector: '#pagos .payment-grid',
+        title: 'Métodos de pago',
+        desc: 'Aquí encuentras las cuentas oficiales (bancos y Yape) para hacer adelantos o pagar el servicio, con botones para copiar los datos.',
+        position: 'top'
+      },
+      {
+        selector: '#contacto .contact-cards-grid',
+        title: 'Contacto directo',
+        desc: 'Y si prefieres hablar directamente con Miguel Ángel, aquí tienes sus canales oficiales de WhatsApp y Gmail.',
+        position: 'top'
+      }
+    ];
+
+    var currentStep = -1;
+    var resizeHandler = null;
+
+    function getEl(sel) { return sel ? document.querySelector(sel) : null; }
+
+    function openQuickMenu() {
+      var menu = document.getElementById('quick-menu');
+      var toggle = document.getElementById('quick-menu-toggle');
+      if (menu && !menu.classList.contains('open')) {
+        menu.classList.add('open');
+        toggle && toggle.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    function closeQuickMenu() {
+      var menu = document.getElementById('quick-menu');
+      var toggle = document.getElementById('quick-menu-toggle');
+      if (menu && menu.classList.contains('open')) {
+        menu.classList.remove('open');
+        toggle && toggle.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function placeCard(rect, pref) {
+      var card = document.getElementById('tutorial-card');
+      var margin = 16;
+      var cw = card.offsetWidth || 300, ch = card.offsetHeight || 160;
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var top, left;
+      pref = pref || 'top';
+
+      if (pref === 'right' && rect.right + margin + cw < vw) {
+        left = rect.right + margin; top = rect.top;
+      } else if (pref === 'left' && rect.left - margin - cw > 0) {
+        left = rect.left - margin - cw; top = rect.bottom - ch;
+      } else if (pref === 'bottom-right') {
+        top = rect.bottom + margin; left = rect.left;
+      } else if (rect.top - margin - ch > 10) {
+        top = rect.top - margin - ch; left = rect.left;
+      } else {
+        top = Math.min(rect.bottom + margin, vh - ch - margin); left = rect.left;
+      }
+
+      left = Math.max(10, Math.min(left, vw - cw - 10));
+      top = Math.max(10, Math.min(top, vh - ch - 10));
+      card.style.left = left + 'px';
+      card.style.top = top + 'px';
+    }
+
+    function placeHand(rect) {
+      var hand = document.getElementById('tutorial-hand');
+      hand.style.left = (rect.left + rect.width / 2) + 'px';
+      hand.style.top = (rect.top + rect.height / 2) + 'px';
+    }
+
+    function placeSpot(rect) {
+      var spot = document.getElementById('tutorial-spot');
+      var pad = 8;
+      spot.style.top = (rect.top - pad) + 'px';
+      spot.style.left = (rect.left - pad) + 'px';
+      spot.style.width = (rect.width + pad * 2) + 'px';
+      spot.style.height = (rect.height + pad * 2) + 'px';
+    }
+
+    function renderPositions() {
+      if (currentStep < 0) return;
+      var step = tutorialSteps[currentStep];
+      var el = getEl(step.selector);
+      if (!el) return;
+      var rect = el.getBoundingClientRect();
+      placeSpot(rect);
+      placeHand(rect);
+      placeCard(rect, step.position);
+    }
+
+    function renderDots() {
+      var wrap = document.getElementById('tutorial-card-dots');
+      wrap.innerHTML = '';
+      tutorialSteps.forEach(function (_, i) {
+        var dot = document.createElement('div');
+        dot.className = 'tut-dot' + (i === currentStep ? ' active' : '');
+        wrap.appendChild(dot);
+      });
+    }
+
+    function goToStep(index) {
+      var prev = tutorialSteps[currentStep];
+      if (prev && typeof prev.onExit === 'function') prev.onExit();
+
+      // Saltar pasos cuyo elemento no exista en esta página/estado.
+      while (index >= 0 && index < tutorialSteps.length && !getEl(tutorialSteps[index].selector)) {
+        index += (index > currentStep ? 1 : -1);
+      }
+      if (index < 0) { closeInteractiveTutorial(); return; }
+      if (index >= tutorialSteps.length) { showFinalScreen(); return; }
+
+      currentStep = index;
+      var step = tutorialSteps[currentStep];
+      if (typeof step.onEnter === 'function') step.onEnter();
+
+      var el = getEl(step.selector);
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      document.getElementById('tutorial-card-step').textContent = 'Paso ' + (currentStep + 1) + ' / ' + tutorialSteps.length;
+      document.getElementById('tutorial-card-title').textContent = step.title;
+      document.getElementById('tutorial-card-desc').textContent = step.desc;
+      document.getElementById('tutorial-back-btn').disabled = currentStep === 0;
+      document.getElementById('tutorial-next-btn').textContent = (currentStep === tutorialSteps.length - 1) ? 'Terminar ✓' : 'Siguiente →';
+      renderDots();
+
+      setTimeout(renderPositions, 260);
+    }
+
+    function showWelcomeScreen() {
+      document.getElementById('tutorial-welcome').classList.add('show');
+    }
+    function hideWelcomeScreen() {
+      document.getElementById('tutorial-welcome').classList.remove('show');
+    }
+    function showFinalScreen() {
+      closeInteractiveTutorial(true);
+      document.getElementById('tutorial-final').classList.add('show');
+    }
+    function hideFinalScreen() {
+      document.getElementById('tutorial-final').classList.remove('show');
+    }
+
+    function closeInteractiveTutorial(skipExit) {
+      if (!skipExit) {
+        var step = tutorialSteps[currentStep];
+        if (step && typeof step.onExit === 'function') step.onExit();
+      }
+      document.getElementById('tutorial-overlay').classList.remove('active');
+      window.removeEventListener('resize', resizeHandler);
+      window.removeEventListener('scroll', resizeHandler);
+      currentStep = -1;
+    }
+
+    function iniciarTutorial() {
+      hideWelcomeScreen();
+      hideFinalScreen();
+      closeQuickMenu();
+      document.getElementById('tutorial-overlay').classList.add('active');
+      resizeHandler = function () { renderPositions(); };
+      window.addEventListener('resize', resizeHandler);
+      window.addEventListener('scroll', resizeHandler, { passive: true });
+      goToStep(0);
+    }
+    // Disponible globalmente para poder lanzarlo desde cualquier parte de la app.
+    window.iniciarTutorial = iniciarTutorial;
+
+    // --- Eventos ---
+    document.getElementById('tutorial-start-btn').addEventListener('click', iniciarTutorial);
+    document.getElementById('tutorial-welcome-close').addEventListener('click', hideWelcomeScreen);
+    document.getElementById('tutorial-skip-btn').addEventListener('click', hideWelcomeScreen);
+
+    document.getElementById('tutorial-next-btn').addEventListener('click', function () { goToStep(currentStep + 1); });
+    document.getElementById('tutorial-back-btn').addEventListener('click', function () { goToStep(currentStep - 1); });
+    document.getElementById('tutorial-card-close').addEventListener('click', function () { closeInteractiveTutorial(); });
+    document.getElementById('tutorial-skip-inline-btn').addEventListener('click', function () { closeInteractiveTutorial(); });
+    document.getElementById('tutorial-finish-btn').addEventListener('click', hideFinalScreen);
+
+    document.getElementById('quick-menu-tutorial-link').addEventListener('click', function (e) {
+      e.preventDefault();
+      iniciarTutorial();
+    });
+
+    // Mostrar la introducción al entrar (el usuario puede cerrarla con la X, sin obligarlo a nada).
+    window.addEventListener('load', function () {
+      setTimeout(showWelcomeScreen, 600);
+    });
+  })();
   </script>
 </body>
 </html>
